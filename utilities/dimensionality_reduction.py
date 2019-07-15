@@ -38,15 +38,14 @@ class RDR(BaseEstimator, TransformerMixin):
         Which method should be used to reduce the dimension of the dataset.
         Different approaches use different cost functions and algorithms for
         solving the optimization problem. The options are:                             
-            - gpcEuclid
-            - gpcRiemann
+            - gpcaEuclid
+            - gpcaRiemann
             - covpca 
     '''
     
-    def __init__(self, n_components=6, method='harandi-uns', params=None):          
+    def __init__(self, n_components=6, method='gpcaRiemann'):          
         self.n_components = n_components
         self.method = method
-        self.params = params
         
     def fit(self, X, y=None):        
         self._fit(X, y)
@@ -66,8 +65,7 @@ class RDR(BaseEstimator, TransformerMixin):
                                    
         self.projector_ = methods[self.method](X=X,
                                                P=self.n_components,
-                                               labels=y,
-                                               params=self.params)                                         
+                                               labels=y)                                       
     
     def _transform(self, X):        
         K = X.shape[0]
@@ -92,7 +90,7 @@ def solve_manopt(X, d, cost, egrad, Wo=None):
                     
     return W                  
     
-def dim_reduction_gpca_riemann(X, P, labels=None, params=None):
+def dim_reduction_gpca_riemann(X, P, labels=None):
     
     def egrad(W, X, M):
         
@@ -147,7 +145,7 @@ def dim_reduction_gpca_riemann(X, P, labels=None, params=None):
     
     return W
         
-def dim_reduction_gpca_euclid(X, P, labels=None, params=None):
+def dim_reduction_gpca_euclid(X, P, labels=None):
     
     def egrad(W, X, M):
         grad = np.zeros(W.shape)
@@ -180,7 +178,7 @@ def dim_reduction_gpca_euclid(X, P, labels=None, params=None):
     
     return W
 
-def dim_reduction_covpca(X, P, labels=None, params=None): 
+def dim_reduction_covpca(X, P, labels=None): 
     
     Xm  = np.mean(X, axis=0)
     w,v = np.linalg.eig(Xm)
